@@ -27,4 +27,23 @@ public class IoUtils {
             e.printStackTrace();
         }
     }
+
+    public static void transferAllByte(InputStream in, OutputStream out) {
+        BufferedInputStream bis = new BufferedInputStream(in, BUFFER_SIZE);
+        BufferedOutputStream bos = new BufferedOutputStream(out, BUFFER_SIZE);
+
+        byte[] buffer = new byte[BUFFER_SIZE];
+        while (true) {
+            try {
+                int len = bis.read(buffer);
+                if (len == -1) {
+                    bos.flush();
+                    return;
+                }
+                bos.write(buffer,0,len);
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }
+    }
 }
