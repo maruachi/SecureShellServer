@@ -64,6 +64,14 @@ public class SecureShellServer {
                     command = new Move(sourceFilename, targetFilename);
                 }
 
+                if (numElement == 4 && commandName == CommandName.SCP) {
+                    String ip = commandLineElement[1];
+                    String serverFilename = commandLineElement[2];
+                    String clientFilename = commandLineElement[3];
+
+                    command = new SecureCopyClient(ip, serverFilename, clientFilename);
+                }
+
                 command.execute();
             }
         } catch (IOException e) {
