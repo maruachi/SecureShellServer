@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 
 public class SecureShellServer {
 
@@ -14,13 +15,41 @@ public class SecureShellServer {
         ServerSocket serverSocket = createServerSocket();
 
         ClientListener clientListener = ClientListener.createByPort(PORT);
+        HashMap<String, String> loginManager = new HashMap<>();
+
+        loginManager.put("dong", "123");
 
         //async로 작성 -> thread처리를 통해 sync로 돌리도록 한다.
         while (true) {
             Socket socket = clientListener.listen();
 
-            Thread sshProcessThread = new Thread(()->sshProcess(socket));
-            sshProcessThread.start();
+            try {
+                BufferedReader reader = IoUtils.toReader(socket.getInputStream());
+                String sshLine = reader.readLine();
+                String[] sshLineElement = sshLine.split("[ ]+");
+                if (sshLineElement.length != 2) {
+                    socket.close();
+                    continue;
+                }
+
+                String username = sshLineElement[0];
+                String password = sshLineElement[1];
+
+                //login 실패
+                Writer writer = IoUtils.toWriter(socket.getOutputStream());
+                if (!(loginManager.containsKey(username) && loginManager.get(username).equals(password))) {
+                    IoUtils.writeLine(writer, "authentication failed");
+                    socket.close();
+                    continue;
+                }
+
+                //login 성공
+                //socket의 자원 해제는 sshProccess가 담당하고 있다.
+                Thread sshProcessThread = new Thread(()->sshProcess(socket));
+                sshProcessThread.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

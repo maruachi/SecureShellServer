@@ -4,6 +4,7 @@ public enum CommandName {
     COPY("cp"),
     MOVE("mv"),
     SCP("scp"),
+    SSH("ssh"),
     EMPTY("");
 
     private final String value;
