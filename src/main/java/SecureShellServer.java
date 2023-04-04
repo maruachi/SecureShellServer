@@ -32,27 +32,32 @@ public class SecureShellServer {
                 String commandLine = reader.readLine();
                 String[] commandLineElement = commandLine.split("[ ]+");
                 int numElement = commandLineElement.length;
+                if (numElement < 1) {
+                    continue;
+                }
 
-                if (numElement == 1 && "quit".equals(commandLineElement[0])) {
+                CommandName commandName = CommandName.createByValue(commandLineElement[0]);
+
+                if (numElement == 1 && commandName == CommandName.QUIT) {
                     IoUtils.writeLine(writer, "ssh 접속을 종료합니다.");
                     return;
                 }
 
                 Command command = new EmptyCommand();
-                if (numElement == 2 && "cat".equals(commandLineElement[0])) {
+                if (numElement == 2 && commandName == CommandName.CAT) {
                     String filename = commandLineElement[1];
 
                     command = new Cat(filename, socket.getOutputStream());
                 }
 
-                if (numElement == 3 && "cp".equals(commandLineElement[0])) {
+                if (numElement == 3 && commandName == CommandName.COPY) {
                     String sourceFilename = commandLineElement[1];
                     String targetFilename = commandLineElement[2];
 
                     command = new Copy(sourceFilename, targetFilename);
                 }
 
-                if (numElement == 3 && "mv".equals(commandLineElement[0])) {
+                if (numElement == 3 && commandName == CommandName.MOVE) {
                     String sourceFilename = commandLineElement[1];
                     String targetFilename = commandLineElement[2];
 
