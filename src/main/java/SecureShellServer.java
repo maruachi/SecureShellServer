@@ -15,9 +15,8 @@ public class SecureShellServer {
         ServerSocket serverSocket = createServerSocket();
 
         ClientListener clientListener = ClientListener.createByPort(PORT);
-        HashMap<String, String> loginManager = new HashMap<>();
-
-        loginManager.put("dong", "123");
+        LoginManger loginManger = LoginManger.createDefault();
+        loginManger.addUser("dong", "123");
 
         //async로 작성 -> thread처리를 통해 sync로 돌리도록 한다.
         while (true) {
@@ -37,7 +36,7 @@ public class SecureShellServer {
 
                 //login 실패
                 Writer writer = IoUtils.toWriter(socket.getOutputStream());
-                if (!(loginManager.containsKey(username) && loginManager.get(username).equals(password))) {
+                if (loginManger.isNotLogin(username, password)) {
                     IoUtils.writeLine(writer, "authentication failed");
                     socket.close();
                     continue;
