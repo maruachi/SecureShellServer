@@ -12,8 +12,6 @@ public class SecureShellServer {
     }
 
     public void run() {
-        ServerSocket serverSocket = createServerSocket();
-
         ClientListener clientListener = ClientListener.createByPort(PORT);
         LoginManger loginManger = LoginManger.createDefault();
         loginManger.addUser("dong", "123");
@@ -37,11 +35,13 @@ public class SecureShellServer {
                 //login 실패
                 Writer writer = IoUtils.toWriter(socket.getOutputStream());
                 if (loginManger.isNotLogin(username, password)) {
+                    IoUtils.writeLine(writer, "FAIL");
                     IoUtils.writeLine(writer, "authentication failed");
                     socket.close();
                     continue;
                 }
 
+                IoUtils.writeLine(writer, "OK");
                 //login 성공
                 //socket의 자원 해제는 sshProccess가 담당하고 있다.
                 Thread sshProcessThread = new Thread(()->sshProcess(socket));
@@ -54,10 +54,12 @@ public class SecureShellServer {
 
     private void sshProcess(Socket socket) {
         try (socket){
+            System.out.println("run sshProcess()");
             BufferedReader reader = IoUtils.toReader(socket.getInputStream());
             Writer writer = IoUtils.toWriter(socket.getOutputStream());
             while (true) {
                 String commandLine = reader.readLine();
+                System.out.println(commandLine);
                 String[] commandLineElement = commandLine.split("[ ]+");
                 int numElement = commandLineElement.length;
                 if (numElement < 1) {
@@ -67,6 +69,7 @@ public class SecureShellServer {
                 CommandName commandName = CommandName.createByValue(commandLineElement[0]);
 
                 if (numElement == 1 && commandName == CommandName.QUIT) {
+                    IoUtils.writeLine(writer, Response.FINISH.getValue());
                     IoUtils.writeLine(writer, "ssh 접속을 종료합니다.");
                     return;
                 }

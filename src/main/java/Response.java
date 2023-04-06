@@ -1,5 +1,5 @@
 public enum Response {
-    OK("ok"), FAIL("fail");
+    OK("ok"), FAIL("fail"), FINISH("finish");
 
     private final String value;
 
@@ -15,5 +15,9 @@ public enum Response {
         }
 
         return Response.FAIL;
+    }
+
+    public String getValue() {
+        return value;
     }
 }
