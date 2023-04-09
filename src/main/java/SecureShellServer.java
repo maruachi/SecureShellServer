@@ -54,7 +54,6 @@ public class SecureShellServer {
 
     private void sshProcess(Socket socket) {
         try (socket){
-            System.out.println("run sshProcess()");
             BufferedReader reader = IoUtils.toReader(socket.getInputStream());
             Writer writer = IoUtils.toWriter(socket.getOutputStream());
             while (true) {
